@@ -4,7 +4,278 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Chat Room - Supabase</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 650px;
+            max-width: 100%;
+            height: 85vh;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #1e2a3e 0%, #0f172a 100%);
+            color: white;
+            padding: 18px 20px;
+            text-align: center;
+        }
+
+        .header-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .online-status {
+            font-size: 0.7em;
+            background: #22c55e;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: normal;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .header-sub {
+            font-size: 0.75em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f1f5f9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.own {
+            align-self: flex-end;
+        }
+
+        .message.other {
+            align-self: flex-start;
+        }
+
+        .message-bubble {
+            padding: 10px 15px;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .own .message-bubble {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .other .message-bubble {
+            background: white;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-username {
+            font-weight: bold;
+            font-size: 0.8em;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .own .message-username {
+            color: #dbeafe;
+        }
+
+        .other .message-username {
+            color: #3b82f6;
+        }
+
+        .message-text {
+            font-size: 0.95em;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .message-time {
+            font-size: 0.65em;
+            margin-top: 5px;
+            opacity: 0.7;
+            display: block;
+        }
+
+        .own .message-time {
+            text-align: right;
+        }
+
+        .chat-input-area {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            gap: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-row:first-child input {
+            flex: 1;
+        }
+
+        #username {
+            width: 150px;
+            padding: 12px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #username:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #messageInput:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        button {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59,130,246,0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info-box {
+            text-align: center;
+            color: #64748b;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 15px;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .chat-container {
+                height: 90vh;
+                border-radius: 15px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .input-row {
+                flex-wrap: wrap;
+            }
+            
+            #username {
+                width: 100%;
+            }
+            
+            button {
+                padding: 12px 20px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="chat-container">
@@ -34,6 +305,165 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js"></script>
+    <script>
+        // ============================================
+        // KONFIGURASI SUPABASE - GANTI DENGAN DATA KAMU!
+        // ============================================
+        
+        const SUPABASE_URL = 'https://poxfyykhljpcqqjtpoyd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_xzSBoKw406IBltlBKTNMqA_Vw5L4ULX';
+        
+        // ============================================
+        // JANGAN UBAH KODE DI BAWAH INI
+        // ============================================
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentUsername = localStorage.getItem('chat_username') || '';
+        let messagesContainer = document.getElementById('chatMessages');
+        let usernameInput = document.getElementById('username');
+        let messageInput = document.getElementById('messageInput');
+        let sendBtn = document.getElementById('sendBtn');
+        
+        if (currentUsername) {
+            usernameInput.value = currentUsername;
+        }
+        
+        usernameInput.addEventListener('change', function() {
+            let username = this.value.trim();
+            if (username) {
+                localStorage.setItem('chat_username', username);
+                currentUsername = username;
+            }
+        });
+        
+        function formatTime(timestamp) {
+            if (!timestamp) return 'Baru saja';
+            let date = new Date(timestamp);
+            let now = new Date();
+            let diff = now - date;
+            if (diff < 60000) return 'Baru saja';
+            if (diff < 3600000) return Math.floor(diff / 60000) + ' menit lalu';
+            return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+        
+        function displayMessage(message) {
+            let isOwn = (currentUsername && message.username === currentUsername);
+            let timeFormatted = formatTime(message.created_at);
+            let messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+            messageDiv.innerHTML = `
+                <div class="message-bubble">
+                    <span class="message-username">${escapeHtml(message.username)}</span>
+                    <div class="message-text">${escapeHtml(message.message)}</div>
+                    <span class="message-time">${timeFormatted}</span>
+                </div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        async function loadOldMessages() {
+            try {
+                const { data, error } = await supabase
+                    .from('messages')
+                    .select('*')
+                    .order('created_at', { ascending: true })
+                    .limit(100);
+                
+                if (error) throw error;
+                
+                const infoBox = messagesContainer.querySelector('.info-box');
+                if (infoBox) infoBox.remove();
+                
+                if (data && data.length > 0) {
+                    data.forEach(msg => displayMessage(msg));
+                } else {
+                    let emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'info-box';
+                    emptyDiv.innerHTML = '💬 Belum ada pesan. Kirim pesan pertama!';
+                    messagesContainer.appendChild(emptyDiv);
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+                messagesContainer.innerHTML = '<div class="info-box">⚠️ Error: ' + error.message + '</div>';
+            }
+        }
+        
+        function subscribeToMessages() {
+            supabase
+                .channel('messages-channel')
+                .on('postgres_changes', 
+                    { event: 'INSERT', schema: 'public', table: 'messages' },
+                    (payload) => {
+                        const emptyInfo = messagesContainer.querySelector('.info-box');
+                        if (emptyInfo && emptyInfo.innerHTML.includes('Belum ada pesan')) {
+                            emptyInfo.remove();
+                        }
+                        displayMessage(payload.new);
+                    }
+                )
+                .subscribe((status) => {
+                    console.log('Subscription status:', status);
+                });
+        }
+        
+        async function sendMessage() {
+            let username = usernameInput.value.trim();
+            let message = messageInput.value.trim();
+            
+            if (!username) {
+                alert('Masukkan nama dulu!');
+                usernameInput.focus();
+                return;
+            }
+            if (!message) return;
+            
+            localStorage.setItem('chat_username', username);
+            currentUsername = username;
+            
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Mengirim...';
+            
+            try {
+                const { error } = await supabase
+                    .from('messages')
+                    .insert([{ username: username, message: message }]);
+                
+                if (error) throw error;
+                messageInput.value = '';
+                messageInput.focus();
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Gagal kirim: ' + error.message);
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = '📨 Kirim';
+            }
+        }
+        
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        async function init() {
+            console.log('🚀 Memulai aplikasi chat...');
+            await loadOldMessages();
+            subscribeToMessages();
+            messageInput.focus();
+            console.log('✅ Chat siap digunakan!');
+        }
+        
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
