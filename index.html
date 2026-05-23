@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Chat Room - Supabase</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-title">
+                💬 Chat Room Online
+                <span class="online-status">● Live</span>
+            </div>
+            <div class="header-sub">Powered by Supabase + GitHub Pages</div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="info-box">
+                ⏳ Menghubungkan ke server...
+            </div>
+        </div>
+        
+        <div class="chat-input-area">
+            <div class="input-row">
+                <input type="text" id="username" placeholder="Nama kamu" maxlength="25" autocomplete="off">
+            </div>
+            <div class="input-row">
+                <input type="text" id="messageInput" placeholder="Ketik pesan di sini..." maxlength="500" autocomplete="off">
+                <button id="sendBtn">📨 Kirim</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+</html>
